@@ -44,6 +44,12 @@ import {
   PieChart,
   ArrowUpDown,
   Scale,
+  Plus,
+  Edit,
+  Trash2,
+  Mail,
+  MapPin,
+  Briefcase,
 } from "lucide-react"
 
 import {
@@ -68,6 +74,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { AddEmployeeModal } from "@/components/AddEmployeeModal"
 
 const navigationData = [
   {
@@ -95,9 +102,7 @@ const navigationData = [
         title: "人员管理",
         icon: User,
         items: [
-          { title: "部门经理", icon: UserCheck },
-          { title: "财务", icon: DollarSign },
-          { title: "老板", icon: User },
+          { title: "员工管理", icon: Users },
         ],
       },
     ],
@@ -239,8 +244,296 @@ const navigationData = [
   },
 ]
 
-const renderPageContent = (activeItem: string) => {
+// 初始员工数据
+const initialEmployeeData = [
+  {
+    id: 1,
+    name: "张三",
+    employeeId: "EMP001",
+    phone: "13800138000",
+    email: "zhangsan@company.com",
+    department: "工程部",
+    position: "施工员",
+    role: "EMPLOYEE",
+    status: "在职",
+    joinDate: "2023-01-15",
+    salary: 8000,
+    address: "北京市朝阳区",
+  },
+  {
+    id: 2,
+    name: "李四",
+    employeeId: "EMP002",
+    phone: "13800138001",
+    email: "lisi@company.com",
+    department: "生产部",
+    position: "技术员",
+    role: "EMPLOYEE",
+    status: "在职",
+    joinDate: "2023-03-20",
+    salary: 7500,
+    address: "北京市海淀区",
+  },
+  {
+    id: 3,
+    name: "王五",
+    employeeId: "EMP003",
+    phone: "13800138002",
+    email: "wangwu@company.com",
+    department: "工程部",
+    position: "安全员",
+    role: "EMPLOYEE",
+    status: "在职",
+    joinDate: "2023-06-10",
+    salary: 7000,
+    address: "北京市丰台区",
+  },
+  {
+    id: 4,
+    name: "赵六",
+    employeeId: "EMP004",
+    phone: "13800138003",
+    email: "zhaoliu@company.com",
+    department: "生产部",
+    position: "质检员",
+    role: "EMPLOYEE",
+    status: "离职",
+    joinDate: "2022-09-01",
+    salary: 6500,
+    address: "北京市西城区",
+  },
+]
+
+const renderPageContent = (
+  activeItem: string, 
+  employeeData: any[], 
+  onAddEmployee: (employee: any) => void, 
+  onShowAddModal: () => void,
+  onToggleStatus: (id: number) => void,
+  onEditEmployee: (employee: any) => void,
+  onDeleteEmployee: (id: number) => void,
+) => {
   switch (activeItem) {
+    case "员工管理":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">员工管理</h1>
+            <button 
+              onClick={onShowAddModal}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              新增员工
+            </button>
+          </div>
+          
+          {/* 统计卡片 */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">总员工数</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{employeeData.length}</div>
+                <p className="text-xs text-gray-600">较上月 +2</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">在职员工</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {employeeData.filter(emp => emp.status === "在职").length}
+                </div>
+                <p className="text-xs text-gray-600">
+                  在职率 {((employeeData.filter(emp => emp.status === "在职").length / employeeData.length) * 100).toFixed(1)}%
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">本月新增</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">3</div>
+                <p className="text-xs text-gray-600">新入职员工</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">平均薪资</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600">
+                  ¥{(employeeData.reduce((sum, emp) => sum + emp.salary, 0) / employeeData.length).toFixed(0)}
+                </div>
+                <p className="text-xs text-gray-600">月平均工资</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 员工列表 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>员工列表</CardTitle>
+              <CardDescription>管理所有员工信息，包括基本信息、联系方式、部门职位等</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {employeeData.map((employee) => (
+                  <div key={employee.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <User className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{employee.name}</h3>
+                        <p className="text-sm text-gray-600">工号：{employee.employeeId}</p>
+                        <div className="flex items-center gap-4 mt-1">
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Briefcase className="h-3 w-3" />
+                            {employee.department} - {employee.position}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Phone className="h-3 w-3" />
+                            {employee.phone}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Mail className="h-3 w-3" />
+                            {employee.email}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge 
+                        variant={employee.status === "在职" ? "default" : "secondary"}
+                        className="cursor-pointer"
+                        onClick={() => onToggleStatus(employee.id)}
+                      >
+                        {employee.status}
+                      </Badge>
+                      <div className="flex gap-1">
+                        <button 
+                          className="p-1 text-gray-400 hover:text-blue-600"
+                          onClick={() => onEditEmployee(employee)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button 
+                          className="p-1 text-gray-400 hover:text-red-600"
+                          onClick={() => onDeleteEmployee(employee.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 部门分布 */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>部门分布</CardTitle>
+                <CardDescription>各部门员工数量统计</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {(() => {
+                    const deptStats = employeeData.reduce((acc, emp) => {
+                      acc[emp.department] = (acc[emp.department] || 0) + 1
+                      return acc
+                    }, {} as Record<string, number>)
+                    
+                    return Object.entries(deptStats).map(([dept, count], index) => {
+                      const percentage = ((count as number / employeeData.length) * 100).toFixed(1)
+                      const colors = ['bg-blue-500', 'bg-green-500', 'bg-orange-500', 'bg-purple-500']
+                      return (
+                        <div key={dept} className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-4 h-4 ${colors[index % colors.length]} rounded-full`}></div>
+                            <span className="text-sm">{dept}</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">{(count as number).toString()}人</p>
+                            <p className="text-xs text-gray-600">{percentage}%</p>
+                          </div>
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>薪资分布</CardTitle>
+                <CardDescription>员工薪资水平统计</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">8000-10000元</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${(employeeData.filter(emp => emp.salary >= 8000 && emp.salary <= 10000).length / employeeData.length) * 100}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-gray-600">
+                        {((employeeData.filter(emp => emp.salary >= 8000 && emp.salary <= 10000).length / employeeData.length) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">6000-8000元</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${(employeeData.filter(emp => emp.salary >= 6000 && emp.salary < 8000).length / employeeData.length) * 100}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-gray-600">
+                        {((employeeData.filter(emp => emp.salary >= 6000 && emp.salary < 8000).length / employeeData.length) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">4000-6000元</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-orange-500 h-2 rounded-full" 
+                          style={{ 
+                            width: `${(employeeData.filter(emp => emp.salary >= 4000 && emp.salary < 6000).length / employeeData.length) * 100}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-gray-600">
+                        {((employeeData.filter(emp => emp.salary >= 4000 && emp.salary < 6000).length / employeeData.length) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )
+
     case "客户名称":
       return (
         <div className="space-y-6">
@@ -872,6 +1165,57 @@ const renderPageContent = (activeItem: string) => {
 
 export default function ProductionManagementSystem() {
   const [activeItem, setActiveItem] = React.useState("客户名称")
+  const [employeeData, setEmployeeData] = React.useState(initialEmployeeData)
+  const [showAddModal, setShowAddModal] = React.useState(false)
+  const [showEditModal, setShowEditModal] = React.useState(false)
+  const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null)
+
+  const handleAddEmployee = (employee: any) => {
+    setEmployeeData([...employeeData, employee])
+  }
+
+  const handleShowAddModal = () => {
+    setShowAddModal(true)
+  }
+
+  const handleCloseAddModal = () => {
+    setShowAddModal(false)
+  }
+
+  // 处理员工状态切换
+  const handleToggleStatus = (employeeId: number) => {
+    setEmployeeData(employeeData.map(emp => {
+      if (emp.id === employeeId) {
+        return {
+          ...emp,
+          status: emp.status === "在职" ? "离职" : "在职"
+        }
+      }
+      return emp
+    }))
+  }
+
+  // 处理编辑员工
+  const handleEditEmployee = (employee: any) => {
+    setSelectedEmployee(employee)
+    setShowEditModal(true)
+  }
+
+  // 处理更新员工信息
+  const handleUpdateEmployee = (updatedEmployee: any) => {
+    setEmployeeData(employeeData.map(emp => 
+      emp.id === updatedEmployee.id ? updatedEmployee : emp
+    ))
+    setShowEditModal(false)
+    setSelectedEmployee(null)
+  }
+
+  // 处理删除员工
+  const handleDeleteEmployee = (employeeId: number) => {
+    if (window.confirm("确定要删除该员工吗？")) {
+      setEmployeeData(employeeData.filter(emp => emp.id !== employeeId))
+    }
+  }
 
   return (
     <SidebarProvider>
@@ -988,8 +1332,29 @@ export default function ProductionManagementSystem() {
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-6 bg-gray-50">{renderPageContent(activeItem)}</div>
+        <div className="flex flex-1 flex-col gap-4 p-6 bg-gray-50">{renderPageContent(activeItem, employeeData, handleAddEmployee, handleShowAddModal, handleToggleStatus, handleEditEmployee, handleDeleteEmployee)}</div>
       </SidebarInset>
+
+      {/* 新增员工弹窗 */}
+      <AddEmployeeModal
+        isOpen={showAddModal}
+        onClose={handleCloseAddModal}
+        onAdd={handleAddEmployee}
+      />
+
+      {/* 编辑员工弹窗 */}
+      {selectedEmployee && (
+        <AddEmployeeModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            setSelectedEmployee(null)
+          }}
+          onAdd={handleUpdateEmployee}
+          initialData={selectedEmployee}
+          isEdit={true}
+        />
+      )}
     </SidebarProvider>
   )
 }
