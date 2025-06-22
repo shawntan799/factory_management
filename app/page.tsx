@@ -882,7 +882,7 @@ export default function ProductionManagementSystem() {
               <Construction className="h-4 w-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-gray-900">生产施工管理</span>
+              <span className="text-sm font-semibold text-gray-900">生产施工管理系统</span>
               <span className="text-xs text-gray-500">v1.0.0 开发者 谭昭阳</span>
             </div>
           </div>
