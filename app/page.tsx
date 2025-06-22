@@ -76,6 +76,15 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { AddEmployeeModal } from "@/components/AddEmployeeModal"
 
+// 导入客户管理组件
+import CustomerBasicInfo from "@/components/customer/CustomerBasicInfo"
+import CustomerContacts from "@/components/customer/CustomerContacts"
+import CustomerTransactions from "@/components/customer/CustomerTransactions"
+
+// 导入供应商管理组件
+import SupplierBasicInfo from "@/components/supplier/SupplierBasicInfo"
+import MaterialPriceList from "@/components/supplier/MaterialPriceList"
+
 const navigationData = [
   {
     title: "基础信息管理",
@@ -535,111 +544,19 @@ const renderPageContent = (
       )
 
     case "客户名称":
-      return (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">客户名称管理</h1>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ 新增客户</button>
-          </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>客户列表</CardTitle>
-              <CardDescription>管理所有客户基本信息</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { name: "华润置地", type: "房地产开发", status: "活跃" },
-                  { name: "万科集团", type: "房地产开发", status: "活跃" },
-                  { name: "绿地控股", type: "房地产开发", status: "暂停" },
-                ].map((customer, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-medium">{customer.name}</h3>
-                      <p className="text-sm text-gray-600">{customer.type}</p>
-                    </div>
-                    <Badge variant={customer.status === "活跃" ? "default" : "secondary"}>{customer.status}</Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )
-
+      return <CustomerBasicInfo />
+    
     case "联系方式":
-      return (
-        <div className="space-y-6">
-          <h1 className="text-2xl font-bold">客户联系方式</h1>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>联系人信息</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { company: "华润置地", contact: "张经理", phone: "138-0013-8888", email: "zhang@cr.com" },
-                    { company: "万科集团", contact: "李总监", phone: "139-0014-9999", email: "li@vanke.com" },
-                  ].map((contact, index) => (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <h3 className="font-medium">{contact.company}</h3>
-                      <p className="text-sm text-gray-600">联系人：{contact.contact}</p>
-                      <p className="text-sm text-gray-600">电话：{contact.phone}</p>
-                      <p className="text-sm text-gray-600">邮箱：{contact.email}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )
-
+      return <CustomerContacts />
+    
     case "历史交易记录":
-      return (
-        <div className="space-y-6">
-          <h1 className="text-2xl font-bold">历史交易记录</h1>
-          <Card>
-            <CardHeader>
-              <CardTitle>交易历史</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  {
-                    date: "2024-01-15",
-                    customer: "华润置地",
-                    project: "CBD写字楼幕墙",
-                    amount: "¥2,350,000",
-                    status: "已完成",
-                  },
-                  {
-                    date: "2024-02-20",
-                    customer: "万科集团",
-                    project: "住宅小区门窗",
-                    amount: "¥1,680,000",
-                    status: "进行中",
-                  },
-                ].map((record, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-medium">{record.project}</h3>
-                      <p className="text-sm text-gray-600">
-                        {record.customer} • {record.date}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{record.amount}</p>
-                      <Badge variant={record.status === "已完成" ? "default" : "secondary"}>{record.status}</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )
+      return <CustomerTransactions />
+    
+    case "供应商信息":
+      return <SupplierBasicInfo />
+    
+    case "合作材料及价格":
+      return <MaterialPriceList />
 
     case "材料成本":
       return (

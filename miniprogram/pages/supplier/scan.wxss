@@ -1,0 +1,173 @@
+/* pages/supplier/scan.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.scan-section {
+  margin-bottom: 40rpx;
+}
+
+.scan-btn {
+  width: 100%;
+  height: 120rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.scan-btn:disabled {
+  background: #ccc;
+}
+
+.scan-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+}
+
+.form-section {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 40rpx;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 15rpx;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  height: 80rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  background: #fafafa;
+}
+
+.textarea {
+  width: 100%;
+  height: 120rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  background: #fafafa;
+}
+
+.action-section {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 80rpx;
+  border: none;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.generate-btn {
+  background: #ff9500;
+  color: white;
+}
+
+.save-btn {
+  background: #007aff;
+  color: white;
+}
+
+.preview-section {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+}
+
+.preview-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.preview-content {
+  border-top: 2rpx solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.preview-item {
+  display: flex;
+  margin-bottom: 15rpx;
+  padding: 10rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.preview-label {
+  font-size: 26rpx;
+  color: #666;
+  width: 200rpx;
+  flex-shrink: 0;
+}
+
+.preview-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+  word-break: break-all;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .container {
+    padding: 15rpx;
+  }
+  
+  .form-section {
+    padding: 20rpx;
+  }
+  
+  .action-section {
+    flex-direction: column;
+  }
+} 
