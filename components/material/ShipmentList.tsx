@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,10 +16,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Truck, FileText, MapPin, Phone, Search } from 'lucide-react'
+import { Plus, Truck, FileText, MapPin, Phone, Search, Eye, Edit, Trash } from 'lucide-react'
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { useForm } from "react-hook-form"
 
 interface Shipment {
   id: number
@@ -37,7 +40,10 @@ interface Shipment {
 }
 
 interface ShipmentItem {
+  id: number
   materialId: number
+  materialType: string
+  materialName: string
   quantity: number
   unit: string
 }
@@ -55,6 +61,19 @@ interface Material {
   name: string
   specification: string
   unit: string
+}
+
+interface ShipmentRecord {
+  id: number
+  shipmentNo: string
+  customerName: string
+  shipmentDate: string
+  status: string
+  items: ShipmentItem[]
+  address: string
+  contact: string
+  phone: string
+  remarks: string
 }
 
 // 模拟数据
@@ -104,6 +123,51 @@ export default function ShipmentList() {
   const [isNewDialogOpen, setIsNewDialogOpen] = React.useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = React.useState<number | null>(null)
   const [selectedItems, setSelectedItems] = React.useState<ShipmentItem[]>([])
+  const [records, setRecords] = useState<ShipmentRecord[]>([
+    {
+      id: 1,
+      shipmentNo: "SH2024032501",
+      customerName: "张三公司",
+      shipmentDate: "2024-03-25",
+      status: "待发货",
+      items: [
+        {
+          id: 1,
+          materialType: "型材",
+          materialName: "铝合金型材",
+          quantity: 100,
+          unit: "米"
+        },
+        {
+          id: 2,
+          materialType: "玻璃",
+          materialName: "钢化玻璃",
+          quantity: 50,
+          unit: "平方米"
+        }
+      ],
+      address: "上海市浦东新区XX路XX号",
+      contact: "张三",
+      phone: "13800138000",
+      remarks: "请在工作日送货"
+    }
+  ])
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isViewMode, setIsViewMode] = useState(false)
+  const [editingRecord, setEditingRecord] = useState<ShipmentRecord | null>(null)
+
+  const form = useForm({
+    defaultValues: {
+      shipmentNo: "",
+      customerName: "",
+      shipmentDate: "",
+      status: "",
+      address: "",
+      contact: "",
+      phone: "",
+      remarks: ""
+    }
+  })
 
   // 搜索出货记录
   const filteredShipments = shipments.filter(shipment => {
@@ -176,14 +240,216 @@ export default function ShipmentList() {
     }
   }
 
+  const onSubmit = (data: any) => {
+    if (editingRecord) {
+      setRecords(records.map(record => 
+        record.id === editingRecord.id ? { ...record, ...data } : record
+      ))
+    } else {
+      setRecords([...records, { ...data, id: records.length + 1, items: [] }])
+    }
+    setIsDialogOpen(false)
+    form.reset()
+    setEditingRecord(null)
+    setIsViewMode(false)
+  }
+
+  const handleView = (record: ShipmentRecord) => {
+    setEditingRecord(record)
+    form.reset(record)
+    setIsViewMode(true)
+    setIsDialogOpen(true)
+  }
+
+  const handleEdit = (record: ShipmentRecord) => {
+    setEditingRecord(record)
+    form.reset(record)
+    setIsViewMode(false)
+    setIsDialogOpen(true)
+  }
+
+  const handleDelete = (id: number) => {
+    setRecords(records.filter(record => record.id !== id))
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">出货管理</h1>
-        <Button onClick={() => setIsNewDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          新建出货单
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open)
+          if (!open) {
+            setIsViewMode(false)
+            setEditingRecord(null)
+            form.reset()
+          }
+        }}>
+          <DialogTrigger asChild>
+            <Button onClick={() => {
+              setEditingRecord(null)
+              setIsViewMode(false)
+              form.reset()
+            }}>
+              <Plus className="h-4 w-4 mr-2" />
+              新建出货单
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {isViewMode ? "查看出货单" : editingRecord ? "编辑出货单" : "新建出货单"}
+              </DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="shipmentNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>出货单号</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isViewMode} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>客户名称</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isViewMode} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="shipmentDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>出货日期</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} disabled={isViewMode} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>状态</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isViewMode}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="选择状态" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="待发货">待发货</SelectItem>
+                            <SelectItem value="已发货">已发货</SelectItem>
+                            <SelectItem value="已签收">已签收</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>送货地址</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isViewMode} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="contact"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>联系人</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isViewMode} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>联系电话</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isViewMode} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="remarks"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>备注</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isViewMode} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {editingRecord && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold">出货物料明细</h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>物料类型</TableHead>
+                          <TableHead>物料名称</TableHead>
+                          <TableHead>数量</TableHead>
+                          <TableHead>单位</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {editingRecord.items.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>{item.materialType}</TableCell>
+                            <TableCell>{item.materialName}</TableCell>
+                            <TableCell>{item.quantity}</TableCell>
+                            <TableCell>{item.unit}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {!isViewMode && (
+                  <div className="flex justify-end">
+                    <Button type="submit">{editingRecord ? "保存" : "创建"}</Button>
+                  </div>
+                )}
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -202,184 +468,43 @@ export default function ShipmentList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>订单号</TableHead>
+                <TableHead>出货单号</TableHead>
                 <TableHead>客户名称</TableHead>
-                <TableHead>物料数量</TableHead>
-                <TableHead>收货信息</TableHead>
-                <TableHead>物流单号</TableHead>
+                <TableHead>出货日期</TableHead>
                 <TableHead>状态</TableHead>
-                <TableHead>创建时间</TableHead>
-                <TableHead className="text-right">操作</TableHead>
+                <TableHead>联系人</TableHead>
+                <TableHead>联系电话</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredShipments.map((shipment) => {
-                const customer = customers.find(c => c.id === shipment.customerId)
-                return (
-                  <TableRow key={shipment.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <FileText className="h-3 w-3" />
-                        {shipment.orderNumber}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{customer?.name}</TableCell>
-                    <TableCell>{shipment.totalQuantity}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {shipment.deliveryAddress}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {shipment.contactPerson} ({shipment.contactPhone})
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {shipment.trackingNumber ? (
-                        <Button
-                          variant="ghost"
-                          className="h-auto p-0 font-normal"
-                          onClick={() => handleTrackShipment(shipment.trackingNumber!)}
-                        >
-                          <Truck className="h-3 w-3 mr-1" />
-                          {shipment.trackingNumber}
-                        </Button>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell>{getStatusText(shipment.status)}</TableCell>
-                    <TableCell>{shipment.createdAt}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        查看详情
+              {records.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell>{record.shipmentNo}</TableCell>
+                  <TableCell>{record.customerName}</TableCell>
+                  <TableCell>{record.shipmentDate}</TableCell>
+                  <TableCell>{record.status}</TableCell>
+                  <TableCell>{record.contact}</TableCell>
+                  <TableCell>{record.phone}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="icon" onClick={() => handleView(record)}>
+                        <Eye className="h-4 w-4" />
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+                      <Button variant="outline" size="icon" onClick={() => handleEdit(record)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" onClick={() => handleDelete(record.id)}>
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
-
-      {/* 新建出货单对话框 */}
-      <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>新建出货单</DialogTitle>
-            <DialogDescription>
-              创建新的出货记录
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleNewSave} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="customerId">选择客户</Label>
-              <Select
-                value={selectedCustomerId?.toString()}
-                onValueChange={(value) => setSelectedCustomerId(Number(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="选择客户" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map(customer => (
-                    <SelectItem key={customer.id} value={customer.id.toString()}>
-                      {customer.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {selectedCustomerId && (
-              <>
-                <div className="space-y-2">
-                  <Label>物料清单</Label>
-                  <div className="border rounded-lg p-4 space-y-4">
-                    {selectedItems.map((item, index) => {
-                      const material = materials.find(m => m.id === item.materialId)
-                      return (
-                        <div key={index} className="flex items-center gap-4">
-                          <div className="flex-1">
-                            <p className="font-medium">{material?.name}</p>
-                            <p className="text-sm text-gray-500">{material?.specification}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span>{item.quantity}</span>
-                            <span>{item.unit}</span>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedItems(items => items.filter((_, i) => i !== index))}
-                          >
-                            删除
-                          </Button>
-                        </div>
-                      )
-                    })}
-
-                    <div className="flex items-end gap-4">
-                      <div className="flex-1 space-y-2">
-                        <Label htmlFor="materialId">选择物料</Label>
-                        <Select name="materialId">
-                          <SelectTrigger>
-                            <SelectValue placeholder="选择物料" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {materials.map(material => (
-                              <SelectItem key={material.id} value={material.id.toString()}>
-                                {material.name} ({material.specification})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="w-32 space-y-2">
-                        <Label htmlFor="quantity">数量</Label>
-                        <Input
-                          id="quantity"
-                          name="quantity"
-                          type="number"
-                          min="1"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          const form = event?.target as HTMLFormElement
-                          const materialId = Number(form.materialId.value)
-                          const quantity = Number(form.quantity.value)
-                          if (materialId && quantity) {
-                            handleAddItem(materialId, quantity)
-                            form.reset()
-                          }
-                        }}
-                      >
-                        添加
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedItems.length > 0 && (
-                  <div className="flex justify-end space-x-2">
-                    <Button type="button" variant="outline" onClick={() => setIsNewDialogOpen(false)}>
-                      取消
-                    </Button>
-                    <Button type="submit">
-                      创建出货单
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 } 

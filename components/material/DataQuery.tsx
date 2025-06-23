@@ -45,7 +45,7 @@ export default function DataQuery() {
     // 在实际应用中，这里应该调用API进行查询
     // 这里只是模拟筛选功能
     const filteredRecords = records.filter(record => {
-      const matchesMaterialType = !data.materialType || record.materialType === data.materialType
+      const matchesMaterialType = !data.materialType || data.materialType === 'all' || record.materialType === data.materialType
       const matchesCustomer = !data.customerName || record.customerName.includes(data.customerName)
       const matchesDateRange = (!data.startDate || record.date >= data.startDate) &&
                              (!data.endDate || record.date <= data.endDate)
@@ -72,7 +72,7 @@ export default function DataQuery() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">全部</SelectItem>
+                      <SelectItem value="all">全部</SelectItem>
                       <SelectItem value="型材">型材</SelectItem>
                       <SelectItem value="玻璃">玻璃</SelectItem>
                       <SelectItem value="五金配件">五金配件</SelectItem>

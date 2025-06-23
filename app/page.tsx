@@ -51,6 +51,11 @@ import {
   MapPin,
   Briefcase,
   Filter,
+  HardHat,
+  FolderKanban,
+  ListTodo,
+  FolderPlus,
+  AlertTriangle,
 } from "lucide-react"
 
 import {
@@ -92,6 +97,12 @@ import ShipmentList from "@/components/material/ShipmentList"
 import LogisticsTracking from "@/components/material/LogisticsTracking"
 import ProcessingQuantity from "@/components/material/ProcessingQuantity"
 import DataQuery from "@/components/material/DataQuery"
+import ProjectList from "@/components/project/ProjectList"
+import ProjectCreate from "@/components/project/ProjectCreate"
+import MaterialCost from "@/components/material/MaterialCost"
+import LaborCost from "@/components/material/LaborCost"
+import CostAlert from "@/components/material/CostAlert"
+import "gantt-task-react/dist/index.css"
 
 const navigationData = [
   {
@@ -126,41 +137,23 @@ const navigationData = [
   },
   {
     title: "工程施工管理",
-    icon: Construction,
+    icon: HardHat,
     items: [
       {
         title: "项目管理",
-        icon: Building2,
+        icon: FolderKanban,
         items: [
-          { title: "工程名称", icon: FileText },
-          { title: "客户信息", icon: Users },
-          { title: "合同金额", icon: DollarSign },
-          { title: "项目周期", icon: Calendar },
-        ],
-      },
-      {
-        title: "生产管理",
-        icon: Settings,
-        items: [
-          { title: "工厂加工", icon: Factory },
-          { title: "产品加工", icon: Package },
-        ],
-      },
-      {
-        title: "进度管理",
-        icon: BarChart3,
-        items: [
-          { title: "加工进度跟踪", icon: TrendingUp },
-          { title: "施工进度监控", icon: BarChart3 },
+          { title: "项目列表", icon: ListTodo },
+          { title: "项目创建", icon: FolderPlus },
         ],
       },
       {
         title: "成本管理",
         icon: DollarSign,
         items: [
-          { title: "材料采购", icon: ShoppingCart },
-          { title: "安装人工", icon: Hammer },
-          { title: "安装辅材", icon: Wrench },
+          { title: "材料成本", icon: Package },
+          { title: "人工成本", icon: Users },
+          { title: "成本预警", icon: AlertTriangle },
         ],
       },
     ],
@@ -559,77 +552,93 @@ const renderPageContent = (
     case "合作材料及价格":
       return <MaterialPriceList />
 
+    case "项目列表":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">项目列表</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>工程项目列表</CardTitle>
+              <CardDescription>查看和管理所有工程项目</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProjectList />
+            </CardContent>
+          </Card>
+        </div>
+      )
+
+    case "项目创建":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">创建项目</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>新建工程项目</CardTitle>
+              <CardDescription>创建新的工程项目并设置基本信息</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProjectCreate />
+            </CardContent>
+          </Card>
+        </div>
+      )
+
     case "材料成本":
       return (
         <div className="space-y-6">
-          <h1 className="text-2xl font-bold">材料成本核算</h1>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>本月材料成本</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600">¥1,203,500</div>
-                <p className="text-sm text-gray-600">占总成本 65%</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>材料类别分布</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">型材</span>
-                    <span className="text-sm font-medium">45%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">玻璃</span>
-                    <span className="text-sm font-medium">30%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">五金配件</span>
-                    <span className="text-sm font-medium">25%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">材料成本管理</h1>
           </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>材料采购成本</CardTitle>
+              <CardDescription>管理和跟踪材料采购成本</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MaterialCost />
+            </CardContent>
+          </Card>
         </div>
       )
 
     case "人工成本":
       return (
         <div className="space-y-6">
-          <h1 className="text-2xl font-bold">人工成本核算</h1>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>人工成本统计</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>安装工人</span>
-                    <span className="font-medium">¥280,000</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>技术工程师</span>
-                    <span className="font-medium">¥150,000</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>项目管理</span>
-                    <span className="font-medium">¥80,000</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between items-center font-bold">
-                    <span>总计</span>
-                    <span>¥510,000</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">人工成本管理</h1>
           </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>人工和辅材成本</CardTitle>
+              <CardDescription>管理人工和辅材成本支出</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LaborCost />
+            </CardContent>
+          </Card>
+        </div>
+      )
+
+    case "成本预警":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">成本预警设置</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>成本预警管理</CardTitle>
+              <CardDescription>设置和管理成本预警规则</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CostAlert />
+            </CardContent>
+          </Card>
         </div>
       )
 
