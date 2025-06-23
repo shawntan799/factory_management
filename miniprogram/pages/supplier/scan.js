@@ -9,7 +9,12 @@ Page({
       businessLicense: '',
       taxNumber: ''
     },
-    isScanning: false
+    isScanning: false,
+    material: null
+  },
+
+  onLoad() {
+    // 页面加载时的处理
   },
 
   // 扫码录入供应商信息
@@ -122,6 +127,76 @@ Page({
     wx.showToast({
       title: '二维码生成成功',
       icon: 'success'
+    })
+  },
+
+  // 扫描二维码
+  scanCode() {
+    wx.scanCode({
+      success: (res) => {
+        this.queryMaterialInfo(res.result)
+      },
+      fail: (err) => {
+        wx.showToast({
+          title: '扫码失败',
+          icon: 'error'
+        })
+      }
+    })
+  },
+
+  // 手动输入
+  inputCode() {
+    wx.showModal({
+      title: '输入物料编号',
+      editable: true,
+      placeholderText: '请输入物料编号',
+      success: (res) => {
+        if (res.confirm && res.content) {
+          this.queryMaterialInfo(res.content)
+        }
+      }
+    })
+  },
+
+  // 查询物料信息
+  queryMaterialInfo(code) {
+    wx.showLoading({
+      title: '查询中...'
+    })
+
+    // 这里应该调用后端API获取物料信息
+    // 目前使用模拟数据
+    setTimeout(() => {
+      const mockData = {
+        name: '铝合金型材',
+        specification: '100mm*50mm',
+        status: 'inStock',
+        statusText: '在库',
+        location: '仓库A区-01-02',
+        updateTime: '2024-03-23 14:30'
+      }
+
+      this.setData({
+        material: mockData
+      })
+
+      wx.hideLoading()
+    }, 1000)
+  },
+
+  // 关闭结果面板
+  closeResult() {
+    this.setData({
+      material: null
+    })
+  },
+
+  // 处理相机错误
+  error(e) {
+    wx.showToast({
+      title: '相机调用失败',
+      icon: 'error'
     })
   }
 }) 

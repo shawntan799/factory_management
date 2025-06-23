@@ -50,6 +50,7 @@ import {
   Mail,
   MapPin,
   Briefcase,
+  Filter,
 } from "lucide-react"
 
 import {
@@ -84,6 +85,13 @@ import CustomerTransactions from "@/components/customer/CustomerTransactions"
 // 导入供应商管理组件
 import SupplierBasicInfo from "@/components/supplier/SupplierBasicInfo"
 import MaterialPriceList from "@/components/supplier/MaterialPriceList"
+
+// 导入物料管理组件
+import MaterialList from "@/components/material/MaterialList"
+import ShipmentList from "@/components/material/ShipmentList"
+import LogisticsTracking from "@/components/material/LogisticsTracking"
+import ProcessingQuantity from "@/components/material/ProcessingQuantity"
+import DataQuery from "@/components/material/DataQuery"
 
 const navigationData = [
   {
@@ -162,20 +170,11 @@ const navigationData = [
     icon: Package,
     items: [
       {
-        title: "数据录入",
-        icon: FileText,
+        title: "物料加工清单",
+        icon: ClipboardList,
         items: [
-          {
-            title: "物料清单",
-            icon: ClipboardList,
-            items: [
-              { title: "型材", icon: Boxes },
-              { title: "玻璃", icon: Glass },
-              { title: "五金配件", icon: Wrench },
-              { title: "辅材", icon: Package },
-            ],
-          },
-          { title: "出货数量", icon: Database },
+          { title: "物料列表", icon: ClipboardList },
+          { title: "加工数量", icon: Calculator },
         ],
       },
       {
@@ -189,7 +188,9 @@ const navigationData = [
       {
         title: "数据查询",
         icon: Search,
-        items: [],
+        items: [
+          { title: "综合查询", icon: Filter },
+        ],
       },
     ],
   },
@@ -397,14 +398,14 @@ const renderPageContent = (
                       <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
                         <User className="h-6 w-6 text-blue-600" />
                       </div>
-                      <div>
+                    <div>
                         <h3 className="font-medium">{employee.name}</h3>
                         <p className="text-sm text-gray-600">工号：{employee.employeeId}</p>
                         <div className="flex items-center gap-4 mt-1">
                           <div className="flex items-center gap-1 text-xs text-gray-500">
                             <Briefcase className="h-3 w-3" />
                             {employee.department} - {employee.position}
-                          </div>
+                    </div>
                           <div className="flex items-center gap-1 text-xs text-gray-500">
                             <Phone className="h-3 w-3" />
                             {employee.phone}
@@ -468,26 +469,26 @@ const renderPageContent = (
                           <div className="flex items-center gap-3">
                             <div className={`w-4 h-4 ${colors[index % colors.length]} rounded-full`}></div>
                             <span className="text-sm">{dept}</span>
-                          </div>
+                    </div>
                           <div className="text-right">
                             <p className="text-sm font-medium">{(count as number).toString()}人</p>
                             <p className="text-xs text-gray-600">{percentage}%</p>
-                          </div>
-                        </div>
-                      )
+          </div>
+        </div>
+      )
                     })
                   })()}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+          <Card>
+            <CardHeader>
                 <CardTitle>薪资分布</CardTitle>
                 <CardDescription>员工薪资水平统计</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">8000-10000元</span>
                     <div className="flex items-center gap-2">
@@ -498,7 +499,7 @@ const renderPageContent = (
                             width: `${(employeeData.filter(emp => emp.salary >= 8000 && emp.salary <= 10000).length / employeeData.length) * 100}%` 
                           }}
                         ></div>
-                      </div>
+                    </div>
                       <span className="text-xs text-gray-600">
                         {((employeeData.filter(emp => emp.salary >= 8000 && emp.salary <= 10000).length / employeeData.length) * 100).toFixed(0)}%
                       </span>
@@ -536,9 +537,9 @@ const renderPageContent = (
                       </span>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
           </div>
         </div>
       )
@@ -1059,6 +1060,96 @@ const renderPageContent = (
               </CardContent>
             </Card>
           </div>
+        </div>
+      )
+
+    case "物料列表":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">物料列表管理</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>物料列表</CardTitle>
+              <CardDescription>管理所有物料信息</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MaterialList />
+            </CardContent>
+          </Card>
+        </div>
+      )
+
+    case "出货清单":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">出货清单管理</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>出货记录</CardTitle>
+              <CardDescription>查看所有出货记录</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ShipmentList />
+            </CardContent>
+          </Card>
+        </div>
+      )
+
+    case "运输管理":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">运输管理</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>运输记录</CardTitle>
+              <CardDescription>查看所有运输记录</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LogisticsTracking />
+            </CardContent>
+          </Card>
+        </div>
+      )
+
+    case "加工数量":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">加工数量管理</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>加工数量</CardTitle>
+              <CardDescription>管理物料加工数量信息</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProcessingQuantity />
+            </CardContent>
+          </Card>
+        </div>
+      )
+
+    case "综合查询":
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">综合数据查询</h1>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>多条件查询</CardTitle>
+              <CardDescription>按物料类型/客户名称/时间范围查询</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataQuery />
+            </CardContent>
+          </Card>
         </div>
       )
 

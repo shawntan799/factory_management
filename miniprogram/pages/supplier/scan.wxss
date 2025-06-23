@@ -170,4 +170,110 @@
   .action-section {
     flex-direction: column;
   }
+}
+
+.scan-area {
+  position: relative;
+  width: 300rpx;
+  height: 300rpx;
+  margin: 20rpx auto;
+}
+
+.scan-border {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 8rpx solid #1890ff;
+  border-radius: 20rpx;
+}
+
+.scan-line {
+  position: absolute;
+  width: 100%;
+  height: 4rpx;
+  background-color: #1890ff;
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    top: 0;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin: 40rpx 0;
+}
+
+.button-group button {
+  min-width: 200rpx;
+}
+
+.result-panel {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 20rpx;
+  margin-top: 40rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #eee;
+}
+
+.result-header .title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.result-header .close {
+  font-size: 40rpx;
+  color: #999;
+  padding: 10rpx;
+}
+
+.result-content {
+  padding: 20rpx 0;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.info-item .label {
+  width: 160rpx;
+  color: #666;
+}
+
+.info-item .value {
+  flex: 1;
+  color: #333;
+}
+
+.status-inStock {
+  color: #52c41a;
+}
+
+.status-inTransit {
+  color: #1890ff;
+}
+
+.status-delivered {
+  color: #722ed1;
+}
+
+.status-returned {
+  color: #f5222d;
 } 

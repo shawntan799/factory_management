@@ -11,8 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Customer, Transaction } from '@/types'
-import { History, FileText, DollarSign, Edit } from 'lucide-react'
+import { History, FileText, DollarSign, Edit, Plus } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 // 模拟初始数据
 const initialTransactions: Transaction[] = [
@@ -74,6 +84,10 @@ export default function CustomerTransactions() {
   const [transactions, setTransactions] = React.useState<Transaction[]>(initialTransactions)
   const [customers] = React.useState<Customer[]>(initialCustomers)
   const [searchTerm, setSearchTerm] = React.useState("")
+  const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
+  const [isNewDialogOpen, setIsNewDialogOpen] = React.useState(false)
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState<number | null>(null)
 
   // 搜索交易记录
   const filteredTransactions = transactions.filter(transaction => {
@@ -116,10 +130,60 @@ export default function CustomerTransactions() {
     }).format(amount)
   }
 
+  // 处理编辑按钮点击
+  const handleEditClick = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
+    setIsEditDialogOpen(true)
+  }
+
+  // 处理编辑保存
+  const handleEditSave = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!editingTransaction) return
+
+    const formData = new FormData(event.currentTarget)
+    const updatedTransaction = {
+      ...editingTransaction,
+      description: formData.get('description') as string,
+      amount: parseFloat(formData.get('amount') as string),
+      date: formData.get('date') as string,
+    }
+
+    setTransactions(transactions.map(t =>
+      t.id === updatedTransaction.id ? updatedTransaction : t
+    ))
+    setIsEditDialogOpen(false)
+    setEditingTransaction(null)
+  }
+
+  // 处理新建保存
+  const handleNewSave = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    
+    const newTransaction: Transaction = {
+      id: Math.max(...transactions.map(t => t.id)) + 1,
+      customerId: Number(formData.get('customerId')),
+      orderNumber: `DD${new Date().getTime()}`,
+      amount: parseFloat(formData.get('amount') as string),
+      date: formData.get('date') as string,
+      status: 'pending',
+      description: formData.get('description') as string
+    }
+
+    setTransactions([...transactions, newTransaction])
+    setIsNewDialogOpen(false)
+    setSelectedCustomerId(null)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">历史交易记录</h1>
+        <Button onClick={() => setIsNewDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          新建交易
+        </Button>
       </div>
 
       <Card>
@@ -191,7 +255,11 @@ export default function CustomerTransactions() {
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleEditClick(transaction)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -202,6 +270,123 @@ export default function CustomerTransactions() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* 新建交易对话框 */}
+      <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>新建交易记录</DialogTitle>
+            <DialogDescription>
+              创建新的交易记录
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleNewSave} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="customerId">选择客户</Label>
+              <Select
+                value={selectedCustomerId?.toString()}
+                onValueChange={(value) => setSelectedCustomerId(Number(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择客户" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map(customer => (
+                    <SelectItem key={customer.id} value={customer.id.toString()}>
+                      {customer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="customerId" value={selectedCustomerId || ''} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">项目描述</Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="请输入项目描述"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">交易金额</Label>
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                placeholder="请输入交易金额"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">交易日期</Label>
+              <Input
+                id="date"
+                name="date"
+                type="date"
+                defaultValue={new Date().toISOString().split('T')[0]}
+                required
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setIsNewDialogOpen(false)}>
+                取消
+              </Button>
+              <Button type="submit" disabled={!selectedCustomerId}>
+                保存
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>编辑交易记录</DialogTitle>
+            <DialogDescription>
+              修改交易记录的详细信息
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSave} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="description">项目描述</Label>
+              <Textarea
+                id="description"
+                name="description"
+                defaultValue={editingTransaction?.description}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">交易金额</Label>
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                defaultValue={editingTransaction?.amount}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">交易日期</Label>
+              <Input
+                id="date"
+                name="date"
+                type="date"
+                defaultValue={editingTransaction?.date}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                取消
+              </Button>
+              <Button type="submit">
+                保存
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 
