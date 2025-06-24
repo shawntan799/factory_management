@@ -8,6 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface TrackingEvent {
   time: string
@@ -47,6 +58,7 @@ export default function LogisticsTracking() {
   const [records, setRecords] = useState<LogisticsRecord[]>(initialRecords)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRecord, setEditingRecord] = useState<LogisticsRecord | null>(null)
+  const [recordToDelete, setRecordToDelete] = useState<number | null>(null)
 
   const form = useForm({
     defaultValues: {
@@ -79,6 +91,7 @@ export default function LogisticsTracking() {
 
   const handleDelete = (id: number) => {
     setRecords(records.filter(record => record.id !== id))
+    setRecordToDelete(null)
   }
 
   return (
@@ -192,9 +205,27 @@ export default function LogisticsTracking() {
                   <Button variant="outline" size="icon" onClick={() => handleEdit(record)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" onClick={() => handleDelete(record.id)}>
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>确认删除</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          您确定要删除这条运输记录吗？此操作无法撤销。
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(record.id)}>
+                          确认删除
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </TableCell>
             </TableRow>

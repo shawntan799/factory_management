@@ -18,6 +18,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Label } from '@/components/ui/label'
 import { Plus, FileText, Edit, Trash } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -95,6 +106,7 @@ export default function ProcessingQuantity() {
   const [records, setRecords] = useState<ProcessingRecord[]>(initialRecords)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRecord, setEditingRecord] = useState<ProcessingRecord | null>(null)
+  const [recordToDelete, setRecordToDelete] = useState<number | null>(null)
 
   const form = useForm({
     defaultValues: {
@@ -129,6 +141,7 @@ export default function ProcessingQuantity() {
 
   const handleDelete = (id: number) => {
     setRecords(records.filter(record => record.id !== id))
+    setRecordToDelete(null)
   }
 
   return (
@@ -300,9 +313,27 @@ export default function ProcessingQuantity() {
                   <Button variant="outline" size="icon" onClick={() => handleEdit(record)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" onClick={() => handleDelete(record.id)}>
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>确认删除</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          您确定要删除这条加工记录吗？此操作无法撤销。
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(record.id)}>
+                          确认删除
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </TableCell>
             </TableRow>

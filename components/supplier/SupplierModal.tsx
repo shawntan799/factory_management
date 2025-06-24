@@ -73,7 +73,7 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier }: Sup
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">供应商名称</Label>
+              <Label htmlFor="name">供应商名称 <span className="text-red-500">*</span></Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -82,7 +82,7 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier }: Sup
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contactPerson">联系人</Label>
+              <Label htmlFor="contactPerson">联系人 <span className="text-red-500">*</span></Label>
               <Input
                 id="contactPerson"
                 value={formData.contactPerson}
@@ -96,7 +96,6 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier }: Sup
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                required
               />
             </div>
             <div className="space-y-2">
@@ -106,7 +105,6 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier }: Sup
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
               />
             </div>
             <div className="space-y-2">
@@ -115,7 +113,6 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier }: Sup
                 id="address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                required
               />
             </div>
             <div className="space-y-2">
@@ -124,7 +121,6 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier }: Sup
                 id="businessLicense"
                 value={formData.businessLicense}
                 onChange={(e) => setFormData({ ...formData, businessLicense: e.target.value })}
-                required
               />
             </div>
             <div className="space-y-2">
@@ -133,7 +129,6 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier }: Sup
                 id="taxNumber"
                 value={formData.taxNumber}
                 onChange={(e) => setFormData({ ...formData, taxNumber: e.target.value })}
-                required
               />
             </div>
           </div>
