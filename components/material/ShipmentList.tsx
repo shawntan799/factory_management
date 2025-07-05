@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,6 +34,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Plus, Truck, FileText, MapPin, Phone, Search, Eye, Edit, Trash } from 'lucide-react'
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
+import { storage, STORAGE_KEYS } from '@/lib/utils'
 
 interface Shipment {
   id: number
@@ -134,35 +135,7 @@ export default function ShipmentList() {
   const [isNewDialogOpen, setIsNewDialogOpen] = React.useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = React.useState<number | null>(null)
   const [selectedItems, setSelectedItems] = React.useState<ShipmentItem[]>([])
-  const [records, setRecords] = useState<ShipmentRecord[]>([
-    {
-      id: 1,
-      shipmentNo: "SH2024032501",
-      customerName: "张三公司",
-      shipmentDate: "2024-03-25",
-      status: "待发货",
-      items: [
-        {
-          id: 1,
-          materialType: "型材",
-          materialName: "铝合金型材",
-          quantity: 100,
-          unit: "米"
-        },
-        {
-          id: 2,
-          materialType: "玻璃",
-          materialName: "钢化玻璃",
-          quantity: 50,
-          unit: "平方米"
-        }
-      ],
-      address: "上海市浦东新区XX路XX号",
-      contact: "张三",
-      phone: "13800138000",
-      remarks: "请在工作日送货"
-    }
-  ])
+  const [records, setRecords] = useState<ShipmentRecord[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isViewMode, setIsViewMode] = useState(false)
   const [editingRecord, setEditingRecord] = useState<ShipmentRecord | null>(null)
@@ -180,6 +153,14 @@ export default function ShipmentList() {
       remarks: ""
     }
   })
+
+  // 从本地存储加载数据
+  useEffect(() => {
+    const savedRecords = storage.get(STORAGE_KEYS.SHIPMENTS)
+    if (savedRecords) {
+      setRecords(savedRecords)
+    }
+  }, [])
 
   // 搜索出货记录
   const filteredShipments = shipments.filter(shipment => {
@@ -253,17 +234,19 @@ export default function ShipmentList() {
   }
 
   const onSubmit = (data: any) => {
+    let updatedRecords
     if (editingRecord) {
-      setRecords(records.map(record => 
-        record.id === editingRecord.id ? { ...record, ...data } : record
-      ))
+      updatedRecords = records.map(record => 
+        record.id === editingRecord.id ? { ...data, id: record.id } : record
+      )
     } else {
-      setRecords([...records, { ...data, id: records.length + 1, items: [] }])
+      updatedRecords = [...records, { ...data, id: records.length + 1 }]
     }
+    setRecords(updatedRecords)
+    storage.set(STORAGE_KEYS.SHIPMENTS, updatedRecords) // 保存到本地存储
     setIsDialogOpen(false)
     form.reset()
     setEditingRecord(null)
-    setIsViewMode(false)
   }
 
   const handleView = (record: ShipmentRecord) => {
@@ -281,8 +264,9 @@ export default function ShipmentList() {
   }
 
   const handleDelete = (id: number) => {
-    setRecords(records.filter(record => record.id !== id))
-    setRecordToDelete(null)
+    const updatedRecords = records.filter(record => record.id !== id)
+    setRecords(updatedRecords)
+    storage.set(STORAGE_KEYS.SHIPMENTS, updatedRecords) // 保存到本地存储
   }
 
   return (

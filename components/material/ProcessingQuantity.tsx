@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +35,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { storage, STORAGE_KEYS } from '@/lib/utils'
 
 // 表单验证schema
 const processingSchema = z.object({
@@ -103,7 +104,7 @@ const materials: Material[] = [
 ]
 
 export default function ProcessingQuantity() {
-  const [records, setRecords] = useState<ProcessingRecord[]>(initialRecords)
+  const [records, setRecords] = useState<ProcessingRecord[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRecord, setEditingRecord] = useState<ProcessingRecord | null>(null)
   const [recordToDelete, setRecordToDelete] = useState<number | null>(null)
@@ -120,14 +121,25 @@ export default function ProcessingQuantity() {
     }
   })
 
-  const onSubmit = (data: any) => {
-    if (editingRecord) {
-      setRecords(records.map(record => 
-        record.id === editingRecord.id ? { ...data, id: record.id } : record
-      ))
-    } else {
-      setRecords([...records, { ...data, id: records.length + 1 }])
+  // 从本地存储加载数据
+  useEffect(() => {
+    const savedRecords = storage.get(STORAGE_KEYS.PROCESSING_RECORDS)
+    if (savedRecords) {
+      setRecords(savedRecords)
     }
+  }, [])
+
+  const onSubmit = (data: any) => {
+    let updatedRecords
+    if (editingRecord) {
+      updatedRecords = records.map(record => 
+        record.id === editingRecord.id ? { ...data, id: record.id } : record
+      )
+    } else {
+      updatedRecords = [...records, { ...data, id: records.length + 1 }]
+    }
+    setRecords(updatedRecords)
+    storage.set(STORAGE_KEYS.PROCESSING_RECORDS, updatedRecords) // 保存到本地存储
     setIsDialogOpen(false)
     form.reset()
     setEditingRecord(null)
@@ -140,7 +152,9 @@ export default function ProcessingQuantity() {
   }
 
   const handleDelete = (id: number) => {
-    setRecords(records.filter(record => record.id !== id))
+    const updatedRecords = records.filter(record => record.id !== id)
+    setRecords(updatedRecords)
+    storage.set(STORAGE_KEYS.PROCESSING_RECORDS, updatedRecords) // 保存到本地存储
     setRecordToDelete(null)
   }
 
